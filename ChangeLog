@@ -1,0 +1,139 @@
+rbook changelog
+===============
+2.4 (released 2009-04-11)
+	* This is mostly a bugfix release, which should increase stability and user expirience a lot
+	* Fixed: Last ingredient in list is not saved (bug #2271878)
+	* Fixed: My Recipes - bad links (bug #1859513)
+	* Fixed: Name field doesn't like quotes (") (bug #1775560)
+	* Fixed: default category was not localized.
+	* Fixed: Warn user if a recipe is missing required information (bug #2662775)
+	* Added: Encrypt the password of the initial user and any new user
+	* Fixed: major problem on creating the initial user
+	* Fixed: Recipes could not be saved, if no serves, preptime or cooktime were entered
+	* Added: "all recipes" and "random recipe" links (feature request #1684338)
+	* Added: Multiple images: select which to delete (feature request #2110495)
+	* Fixed: quotes ' in APPTITLE not handled correctly (bug #1878275)
+	* Fixed: user creation on install
+	* Fixed: Link to user profile broken in comments
+	* Fixed: the servings slider (bug #2461522)
+	* Updated Smarty to 2.6.22, updated scriptaculous/prototype
+	* (Re-)added index.php with information for users having mod rewrite disabled
+
+2.3 (released 2008-09-21)
+	* Added OpenSearch search plugin for direct search from the browser
+	* Added SPAM protection to the guestbook(feature request 2110495)
+	* Updated used libraries to current versions
+	* Added a help/about page
+	* Fixed: Image upload broken for IE6.
+	* Fixed: My Recipes affects "submitted by" (bug 1859527)
+	* Added a message if no results were found for a search
+    * Increasing the accuracy of the conversion function. (bug 1586458)
+	* Fixed several smaller bugs and layout problems
+
+2.2 (released 2007-12-01)
+    * Added a guestbook (feature request 1767636)
+	* Display multiple images per recipe (feature request 1682738)
+	* Controllable slideshow for images
+	* Redesigned image displaying
+	* Exporter now outputs a formatted xml file
+	* Various Importer/Exporter fixes
+	* Several general fixes
+
+2.1.2 (released 2007-07-20)
+    * Added support for auto-generating controller PHP files for people who can't use mod_rewrite
+
+2.1.1 (released 2007-06-30)
+    * Fixed a problem with the install program
+	
+2.1 (released 2007-06-29)
+    * Refactored code
+	* Added extra information fields to user
+	* Add 'popularity' sorting
+	* Converted steps into sortable list, rather than a table
+
+2.0.4 (released 2007-06-13)
+    * Fixed bug in installer that was causing page to go blank
+	
+2.0.3 (released 2007-06-11)
+    * Fixed 1735291
+	* Fixed problems related to saving user profiles and importing data
+	
+2.0.2 (released 2007-06-03)
+    * Fixed problem with redirect after a recipe is saved
+    * Fixed problem with redirect after a recipe is deleted
+
+1.5
+	* 1576970 - Initial support for skins
+	* 1555815 - Added cook time, prep-time and total-time
+
+1.4.1
+	* 1576957 - Completed 'serves' feature
+	* 1576959 - Recipe multiplier
+	* 1654772 - Recipe image not floated properly
+	* 1654767 - Grocery list does not handle apostrophes in items
+	* 1654764 - Remove empty category field on search results
+1.4
+	* Added grocery list functionality
+	* Enchanced mobile viewing
+1.1
+	* Allow multiple categories (Feature 1489672)
+	* Detects mobile user agents and adjusts display accordingly
+	* Reforumlated recipe.js to use scriptaculous' Builder class	
+	* Refactored stylesheets to use scalable fonts 
+	* Used scriptaculous Appear effect for warning messages
+	* Added extended options to installation program
+	* Added ability to import/export both 1.0 and 1.1 datasets (provides an upgrade path from 1.0)
+	* Added drag-n-drop sorting to recipe editor
+1.0 
+	* Wrapped up auto-suggest and a few other stylistic things
+
+1.0 beta 4
+	* Added conversion back in
+	* Finished i18n stuff
+
+0.9.8.0 
+	* Revamped Look-n-feel
+	* Used Smarty template system
+	* Added export-import feature
+	* Added unit tests
+	* Fixed some bugs in the Javascript code
+	
+0.9.7.0
+	* Changed database calls to use PEAR::db
+	* Improved error handling in installer
+	* Fixed bug in pickReplacementCategory.php that was causing an error
+	
+0.9.6.0 
+	* Moved editing of ingredient sets into edit recipe page
+	* Added RSS feed for most recently edited recipe
+	
+0.9.5.0
+	* Total overhaul of code
+	* Added 'my recipes'
+	* Started adding 'suggest' feature, although this is turned off by default
+	
+0.9.4.0
+	* Fixed problem where it would cache the user name even though the user was not logged on.
+	* Added better tagging ability (italics, underline, bold, and recipe tags)
+	* Standardized how buttons are displayed
+	* Cleaned up the default stylesheet
+	
+0.9.3.1
+	* Changed look and feel
+	* Improved the installation program
+	
+0.9.2.0
+	* Fixed a bad bug where the sorting of the steps was out of whack
+	* Added ability to edit steps directly
+	* Added ability to move steps around
+	* Added linking ability in recipe markup
+	* Fixed delete logic of ingredient sets so that deleting the set does not occur until the recipe is saved
+	* Changed the charset to utf-8
+	* Note is directly edited now instead of being explicitly added
+	
+0.9.1.0
+	* Added config.properties file so that configuration could be driven from an external file instead of config.php
+	* Added version number to footer
+	* Search by category displays the category name
+
+0.9 - Initial Version

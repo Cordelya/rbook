@@ -1,0 +1,24 @@
+td,table,#bodydiv { border-style:none; }
+#container { border-style: none; }
+#content {margin-left: 0 }
+a.onpage { color: black; }
+#footerDiv,div.loginBar,div.topBar,div.leftbar,#recipeEditBar,#rightbox,#headerTitle,#commentsSection,.commentSeparator { 
+	display: none; 
+}
+h2.recipe, h1.recipeTitle { color: black; }
+	.notprintable { display:none !important; }
+	td,table,#bodydiv {
+		border-style:none;
+	}
+	#container {
+		border-style: none;
+	}
+	#comments, #footerDiv,div.loginBar,#topBar,div.leftbar,#bookmarks, #recipeEditBar,#rightbox,#leftbox {
+		display: none;
+	}
+	#groceryAdd, #addGroceryButton, #saveGroceryButton,.giccb,#clearListButton {
+		display: none;
+	}
+	h2.recipe, h1.recipeTitle {
+		color: black;
+	}

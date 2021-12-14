@@ -1,0 +1,8 @@
+# rbook rewrite configuration
+# All requests are passed to the dispatcher class.
+# If a requested file actually exists, no rewriting is done.
+Options +FollowSymLinks +ExecCGI
+RewriteEngine On
+RewriteRule searchplugin.src searchplugin.src.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ dispatch.php [QSA,L]

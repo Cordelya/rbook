@@ -1,0 +1,59 @@
+* {
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 1em;
+}
+
+h1 {
+  font-size: 180%;
+}
+
+body {
+  font-size: 75%;
+}
+.big {
+  font-size: 120%;
+}
+
+li.big {
+  line-height: 180%;
+}
+.helpbox {
+	border: 1px solid #397DBD;
+	text-align: center;
+}
+
+a.helpbox {
+	padding: 2px 2px 2px 2px;
+	margin-left: 5px;
+	text-decoration: none;
+}
+
+
+
+#mainDiv {
+margin-right: auto;
+margin-left: auto;
+width: 50em;
+}
+
+#buttonRow {
+	padding-top: 10px;
+	text-align: right;
+}
+
+.important {
+	color: red;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+h2 {
+	color: #397DBD;
+}
+h1 {
+	width: 100%;
+	color: white;
+	background-color: #397DBD;
+	text-align:center;
+	padding: 10px 10px 10px 10px;
+}

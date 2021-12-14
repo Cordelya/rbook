@@ -1,0 +1,67 @@
+<?php
+/* the host that the database is running on */
+define("DBHOST", "localhost");
+
+/* the database user that the application uses to access the database */
+define("DBUSER", "root");
+
+/* the password used to access the database */
+define("DBPASSWORD", "root");
+
+/* the database name */
+define("DBNAME","rbook");
+
+/* The URI of the application.  This should always end in a '/'.For instance,
+   if you are running this at the top-level, it would be /.  If the URL was
+   www.foo-bar.com/rbook/, the APPROOT would be /rbook/ */
+define("APPROOT","/rbook/trunk/src/");
+
+/* the stylesheet to use (this should reside in ./style */
+define("STYLESHEET","style.css");
+
+/* whether to display recipe if only one result is returned */
+define("DISPLAYIFONLYONE", true);
+
+/* The skin that is being used.  This should be the name of a directory under the skins directory */
+define("SKIN","default");
+
+/* the title to be displayed in the title bar and in the header */
+define("APPTITLE","recipes");
+
+/* the intial user (not used by app, just for re-install) */
+define("INITIALUSER","andrew");
+
+/* the intial email (not used by app, just for re-install) */
+define("INITIALEMAIL","foo@bar");
+
+/* Maximum number of invitations a user can send (0 to disable) */
+define("MAXINVITATIONS", 100);
+
+/* Enable debugging */
+define("DEBUG", false);
+
+/* Log file path (e.g. /foo/bar/rbook.log) */
+//define("LOG_FILE_PATH", "");
+
+/* To turn on google analytics, uncomment this line and put the value of your google analytics acount */
+//define("GOOGLE_ANALYTICS", "");
+
+/* turn on/off recipe-suggest */
+define("RECIPESUGGEST",true);
+
+/* define import drop-zone.   If specified, this will be where
+ * export files will be placed for import into the current system.
+ * If this is not specified, then the Import menu option is not displayed.
+ */
+define("IMPORTDIR", "c:/data/export");
+
+/* Path to convert executable program used to scale images to size */
+define("IMAGEMAGICK", "c:/progra~1/ImageMagick-6.2.9-Q16/convert.exe");
+
+/* this can either be member or all.  If it is member only members can view the recipes.*/
+define("VIEW_POLICY","all");
+
+/* The language you want rbook to be displayed in.*/
+define("LANGUAGE","en");
+
+?>

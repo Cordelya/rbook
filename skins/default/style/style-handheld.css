@@ -1,0 +1,6 @@
+#headerTitle { font-size: 24pt; font-weight: bold; margin: 0px; }
+#loginheader { margin: 10px 0 10px 0; }
+.catlink { font-size: 10pt; }
+.resultNav { font-size: 10pt;}
+#conversionLink, #newRecipeLink, #rightbox, .box { display:none; }
+#groceryListViewInstructions { display:none !important; }

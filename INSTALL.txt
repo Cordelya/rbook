@@ -1,0 +1,3 @@
+To install:
+
+Go to http://<yourbox>/<installdir>/install/index.php and fill out the form and follow the directions.
