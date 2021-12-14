@@ -28,23 +28,23 @@
 
 class MysqlDBInstaller extends DBInstaller {
   
-  function MysqlDBInstaller() {
+  function MysqlDBInstaller_f() {
     $this->DBInstaller();
   }
   
   function createDatabase() {
 	
-    $con = @mysql_connect($this->databaseHost, $this->adminUser, $this->password);
+    $con = @mysqli_connect($this->databaseHost, $this->adminUser, $this->password);
     if(!$con) {
-      $this->errors[] = mysql_error();
+      $this->errors[] = mysqli_error();
       return;
     }
     
     $this->exists = true;
     if($this->action == "fresh") {
-      mysql_query("DROP DATABASE IF EXISTS " . $this->databaseName);
-      mysql_query("CREATE DATABASE " . $this->databaseName , $con);
-      $error = mysql_error();
+      mysqli_query("DROP DATABASE IF EXISTS " . $this->databaseName);
+      mysqli_query("CREATE DATABASE " . $this->databaseName , $con);
+      $error = mysqli_error();
       if(!empty($error)) {
         $this->errors[] = $error;
         return;

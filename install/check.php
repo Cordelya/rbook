@@ -84,21 +84,22 @@ if(!file_exists($foo)) {
   unlink($foo);
 }
 
+
 /******************************************************************************
- * Check for the inclusion of PEAR DB
+ * Check for the inclusion of PDO
  *****************************************************************************/
 
-include 'DB.php';
-
-if(!defined("DB_OK")) {
-  $errors[] = "E|".getMessage('errPearDbNotFound')."|".getMessage("pearDbNotFound").$f;
+if(!class_exists("PDO")) {
+  $errors[] = "E|".getMessage('errPDONotFound')."|".getMessage("PDONotFound").$f;
 }
 
+
+# TODO check whether this is needed since we're using PDO which is core
 /******************************************************************************
- * Check that mysql extension is installed
+ * Check that mysqli extension is installed
  *****************************************************************************/
 
-if(!extension_loaded('mysql')) {
+if(!class_exists('PDO_mysql')) {
   $errors[] = "E|".getMessage('mysqlNotFound')."|".getMessage("mysqlNotFound").$f;
 }
 
@@ -140,6 +141,7 @@ th, td { padding: 0.5em; }
 <div id="mainDiv">
 <h1><?php echo getMessage('configurationScan'); ?></h1>
 <p><?php echo getMessage('issuesConfiguration'); ?></p>
+<p><?php print_r($errors); ?>
 <table id="errorTable">
 <thead>
 <tr>
@@ -150,7 +152,7 @@ th, td { padding: 0.5em; }
 </thead>
 <tbody>
 <?php foreach($errors as $error) { 
-  $foo = split('\|', $error);
+  $foo = explode('\|', $error);
 ?>
 <tr>
   <td class="warningCol <?php echo($foo[0]);?>"><?php echo($foo[0] == "W" ? getMessage('Warning') : getMessage('Error')); ?></td>

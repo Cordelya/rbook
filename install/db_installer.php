@@ -26,7 +26,7 @@
  * @since 0.9
  * @version $Id: db_installer.php,v 1.18 2007/04/07 01:45:00 aviolette Exp $
  */
-require_once('DB.php');
+
 
 require_once("../const.php");
 
@@ -68,7 +68,7 @@ class DBInstaller {
   var $buildDatabase;
   var $language;
 
-  function DBInstaller() {
+  function __construct() {
     $this->databaseName = DBNAME;
     $this->action = DBACTION;
     $this->adminUser = "root";
@@ -134,9 +134,6 @@ class DBInstaller {
     $this->dbUserName = $postValues['databaseUserName'];
     $this->approot = $postValues['approot'];
     $this->skin = $postValues['skin'];
-    // Check if quoting is enabled and remove escape characters from the apptitle
-	if(get_magic_quotes_gpc()) {
-        $this->title = stripslashes($postValues['title']);
     } else {
 		$this->title = $postValues['title'];
 	}	
@@ -148,6 +145,12 @@ class DBInstaller {
 	$this->language = $postValues['language'];
   }
 
+/****************************************************************
+ ***********************[DB]*************************************
+ * TODO Relocate DB connection to a db.php functions file       *
+ * so that the only functions remaining here are the calls      *
+ * to the DB to create the tables (or drop in case of uninstall *
+ ****************************************************************/
   function getDbUrl() {
     return "mysql://" . $this->adminUser . ":" . $this->password . "@" . $this->databaseHost . "/" . $this->databaseName;
   }
