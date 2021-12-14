@@ -143,26 +143,32 @@ class DBInstaller {
 	$this->language = $postValues['language'];
   }
 
-/****************************************************************
- ***********************[DB]*************************************
- * TODO Relocate DB connection to a db.php functions file       *
- * so that the only functions remaining here are the calls      *
- * to the DB to create the tables (or drop in case of uninstall *
- ****************************************************************/
-  function getDbUrl() {
-    return "mysql://" . $this->adminUser . ":" . $this->password . "@" . $this->databaseHost . "/" . $this->databaseName;
-  }
+
+//  function getDbUrl() {
+//    return "mysql://" . $this->adminUser . ":" . $this->password . "@" . $this->databaseHost . "/" . $this->databaseName;
+//  }
 
   function &getDb() {
 
-    $con =& DB::connect($this->getDbUrl());
-    if(PEAR::isError($con)) {
-	  trigger_error("Couldn't connect to database");
-	  return null;
-    }
+	  $dsn = "mysql:host=" . $this->databaseHost;
+	  $options = [
+		PDO::ATTR_ERRMODE 		=> PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC,
+		PDO::ATTR_EMULATE_PREPARES	=> false,
+	  ];
+	  try {
+		  $con = new PDO($dsn, $this->adminUser, $this->password, $options);
+	  } catch (\PDOException $e) {
+	  	throw new \PDOException($e->getMessage(), (int)$e->getCode());
+	  }
+	  if ($e) {
+	  	print_r($e);
+	  } else {
     return $con;
+	  }
   }
 
+  
   function uninstall() {
     $db =& $this->getDb();
     $res =& $db->query("drop database " . $this->databaseName);
@@ -172,7 +178,7 @@ class DBInstaller {
   }
 
   function install() {
-    $this->errors = array();
+	  $this->errors = array();
     $this->createConfigFile();
 
     if(count($this->errors)) {
@@ -180,7 +186,9 @@ class DBInstaller {
     }
 
     if($this->buildDatabase) {
-      $this->createDatabase();
+	    echo "<p>We need a new database. Please Wait...</p>";
+	    $this->createDatabase();
+	    echo "<p>All done!</p>";
     }
     $db = $this->getDb();
 	if(!isset($db)) {
@@ -203,20 +211,21 @@ class DBInstaller {
     $this->createInitialUser($db);
     $this->createGroceryListTable($db);
     $this->createCommentTable($db);
-	$this->createGuestbookTable($db);
+    $this->createGuestbookTable($db);
     $this->populateCategories($db);
-    $db->disconnect();
+    $db = null;
   }
 
   function createDatabaseUser(&$db) {
     if(empty($this->dbUserName)) {
       return;
     }
-    $this->runQuery($db, "grant update,insert,delete,select on " .
-                    $this->databaseName . ".* to '" .
-                    $this->dbUserName . "'@'" . $this->databaseHost . "'");
-    $this->runQuery($db, "set password for '" . $this->dbUserName .
-            "'@'" . $this->databaseHost . "' = PASSWORD('" . $this->password . "')");
+    $q = "GRANT UPDATE, INSERT, DELETE, SELECT ON :dbname.* to :dbuser;";
+    $params = array(":dbname" => $this->databaseName, ":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost."'"));
+    $this->runQuery($db, $q, $params);
+    $q = "SET password FOR :dbuser =PASSWORD(:password);";
+    $params = array(":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost . "'"), ":password" => $this->password);
+    $this->runQuery($db, $q, $params);
   }
 
   function populateCategories(&$db) {
@@ -231,18 +240,25 @@ class DBInstaller {
     }
   }
 
-  function &runQuery(&$db, $query, $params = null, $file = null, $line = null) {
-    if(isset($params)) {
-      $res =& $db->query($query, $params);
-    } else {
-      $res =& $db->query($query);
-    }
-    if(PEAR::isError($res)) {
-      $file = empty($file) ? "" : $file;
-      $line = empty($line) ? "" : $line;
-      $this->logError($res->getMessage(), $file, $line);
-      die($file . "," . $line . "," . $query . "," . $res->getMessage());
-    }
+  function &runQuery(&$db, $sql, $params = null, $file = null, $line = null) {
+	  if(isset($params)) {
+		  $query = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+		  echo "<p>";
+		  print_r($query);
+		  echo "</p>";
+		  $query->execute($params);
+			
+		$res = $query->fetchAll();
+    	} else {
+      $res = $db->query($sql);
+	}
+	//TODO update error handling
+    //if(PEAR::isError($res)) {
+    //  $file = empty($file) ? "" : $file;
+    //  $line = empty($line) ? "" : $line;
+    //  $this->logError($res->getMessage(), $file, $line);
+    //  die($file . "," . $line . "," . $query . "," . $res->getMessage());
+    //}
     return $res;
 
   }
@@ -251,14 +267,14 @@ class DBInstaller {
 
   function createInitialUser(&$db) {
 
-    $id = $db->nextId("users");
-	$params = array($id, $this->initialEmail, 'root', md5('password'), $this->initialUser);
-    $res =& $db->query("insert into users (id, email, username, password, name, readonly, admin) values (?, ?, ?, ?, ?, 0, 1)",
-               $params);
+	$params = array($this->initialEmail, 'root', md5('password'), $this->initialUser);
+    $res = $db->query("insert into users (email, username, password, name, readonly, admin) values (?, ?, ?, ?, ?, 0, 1)",
+	    $params);
 
-    if(PEAR::isError($res)) {
-      $this->logError($res->getDebugInfo(), __FILE__, __LINE__);
-    }
+//TODO update error handling
+//    if(PEAR::isError($res)) {
+//      $this->logError($res->getDebugInfo(), __FILE__, __LINE__);
+//    }
   }
 
   function createMineTable(&$db) {

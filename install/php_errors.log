@@ -1,0 +1,4 @@
+[14-Dec-2021 08:31:58 America/New_York] PHP Notice:  Undefined property: MysqlDBInstaller::$title in /home/ubuntu/public_html/install/install.php on line 122
+[14-Dec-2021 08:31:58 America/New_York] PHP Notice:  Undefined property: MysqlDBInstaller::$stylesheet in /home/ubuntu/public_html/install/install.php on line 130
+[14-Dec-2021 08:31:58 America/New_York] PHP Notice:  Undefined property: MysqlDBInstaller::$skin in /home/ubuntu/public_html/install/install.php on line 131
+[14-Dec-2021 08:31:58 America/New_York] PHP Notice:  Undefined property: MysqlDBInstaller::$convertProgram in /home/ubuntu/public_html/install/install.php on line 169

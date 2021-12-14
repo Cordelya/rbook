@@ -28,26 +28,48 @@
 
 class MysqlDBInstaller extends DBInstaller {
   
-  function MysqlDBInstaller_f() {
+  function MysqlDBInstaller() {
     $this->DBInstaller();
   }
   
   function createDatabase() {
-	
-    $con = @mysqli_connect($this->databaseHost, $this->adminUser, $this->password);
-    if(!$con) {
-      $this->errors[] = mysqli_error();
-      return;
+	  $dsn = "mysql:host=" . $this->databaseHost;
+	  $options = [
+		PDO::ATTR_ERRMODE		=> PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC,
+		PDO::ATTR_EMULATE_PREPARES	=> false,
+	  ];
+	  try {
+		$con = new PDO($dsn, $this->adminUser, $this->password, $options);
+	  } catch (\PDOException $e) {
+		throw new \PDOException($e->getMessage(), (int)$e->getCode());
+	  }
+    //$con = @mysqli_connect($dsn, $this->adminUser, $this->password, $options);
+	  
+      if(!$con) {
+      	$this->errors[$e] = $e;
+      	return;
     }
     
     $this->exists = true;
     if($this->action == "fresh") {
-      mysqli_query("DROP DATABASE IF EXISTS " . $this->databaseName);
-      mysqli_query("CREATE DATABASE " . $this->databaseName , $con);
-      $error = mysqli_error();
-      if(!empty($error)) {
-        $this->errors[] = $error;
-        return;
+	    //drop any existing db
+	    $q = "DROP DATABASE IF EXISTS :db";
+	    $params = array(":db" => $this->databaseName);
+	    $sth = $con->prepare($q, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+	    $sth->execute($params);
+	    $q_result = $sth->fetchAll();
+	    //create new database
+	    $q = "CREATE DATABASE :db";
+	    $params = array(":db" => $this-databaseName);
+	    $sth = $con->prepare($q, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+	    $q_result = $sth->fetchAll();
+	    if ($q_result) {
+		    return $q_result;
+		    exit;
+	    } else if ($e) {
+		    return $e;
+		    exit;
       }
     }
   }
