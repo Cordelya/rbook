@@ -134,9 +134,7 @@ class DBInstaller {
     $this->dbUserName = $postValues['databaseUserName'];
     $this->approot = $postValues['approot'];
     $this->skin = $postValues['skin'];
-    } else {
-		$this->title = $postValues['title'];
-	}	
+    $this->title = $postValues['title'];	
     $this->viewPolicy = $postValues['viewPolicy'];
     $this->maxInvitations = $postValues['maxInvitations'];
     $this->exportDirectory = $postValues['exportDirectory'];
