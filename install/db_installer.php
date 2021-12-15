@@ -161,19 +161,15 @@ class DBInstaller {
 	  } catch (\PDOException $e) {
 	  	throw new \PDOException($e->getMessage(), (int)$e->getCode());
 	  }
-	  if ($e) {
-	  	print_r($e);
-	  } else {
     return $con;
 	  }
   }
 
   
-  function uninstall() {
+function uninstall() { //TODO update query/PDO
     $db =& $this->getDb();
     $res =& $db->query("drop database " . $this->databaseName);
-    if(PEAR::isError($res)) {
-      $this->logError($res->getMessage(), __FILE__, __LINE__);
+
     }
   }
 
@@ -218,13 +214,15 @@ class DBInstaller {
     if(empty($this->dbUserName)) {
       return;
     }
-    //TODO need to create the user in one SQL query, then update privs in 2nd, then set password in 3rd
-    $q = "GRANT UPDATE, INSERT, DELETE, SELECT to :dbuser;";
+    // create DB user & grant perms
+    $q_create = "CREATE USER IF NOT EXISTS :dbuser;";
+    $q_grant = "GRANT UPDATE, INSERT, DELETE, SELECT to :dbuser;";
     $params = array(":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost."'"));
-    $this->runQuery($db, $q, $params);
-    $q = "SET password FOR :dbuser =PASSWORD(:password);";
+    $this->runQuery($db, $q_create, 0, $params);
+    $this->runQuery($db, $q_grant, 0, $params);
+    $q_set = "SET password FOR :dbuser =PASSWORD(:password);";
     $params = array(":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost . "'"), ":password" => $this->password);
-    $this->runQuery($db, $q, $params);
+    $this->runQuery($db, $q_set, 0, $params);
   }
 
   function populateCategories(&$db) {
@@ -239,15 +237,41 @@ class DBInstaller {
     }
   }
 
-  function &runQuery(&$db, $sql, $params = null, $file = null, $line = null) {
-	  if(isset($params)) {
-		  $query = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
-		  $query->execute($params);
-			
-		$res = $query->fetchAll();
-    	} else {
-      $res = $db->query($sql);
+  function &runQuery(&$db, $sql, $qtype = 0, $params = null, $file = null, $line = null) {
+// because of the way PDO handles queries, we need to adjust how we send a
+	  // query based on whether we expect to receive data or just a confirmation
+	  // $qtype = 0 for CREATE, UPDATE, INSERT, GRANT, etc
+	  // $qtype = 1 for SELECT
+switch ($qtype) {  
+	case 0: // No data is returned, only num rows
+	  	try {
+			if(isset($params)) {
+		  
+				$query = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+				$query->execute($params);
+				$res = $query->rowCount();
+				return $res
+			} else {
+				$res = $db->exec($sql);
+				return $res
+			}
+		} catch (Exception $e) {
+			error_log(("Caught Exception: ", $e->getMessage(), "\n")), 0);
+		}
+	case 1: // data is returned
+                try {
+                       if(isset($params)) {
+                                $query = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+                                $query->execute($params);
+                                $res = $query->fetchAll();
+                        } else {
+                                $query = $db->exec($sql);
+                                $res = $query->fetchAll();
+                        }
+                } catch (Exception $e) {
+                        error_log(("Caught Exception: ", $e->getMessage(), "\n"), 0);
 	}
+}
 	//TODO update error handling
     //if(PEAR::isError($res)) {
     //  $file = empty($file) ? "" : $file;
@@ -323,7 +347,7 @@ class DBInstaller {
                    "index images_recipe (recipeid)," .
                    "foreign key (recipeid) references recipes(id) on delete cascade," .
                    "foreign key (submittedby) references users(id) on delete cascade," .
-                   "primary key(id))", null, __FILE__, __LINE__);
+                   "primary key(id))", 0, null, __FILE__, __LINE__);
   }
 
   function createStepsTable(&$db) {
@@ -335,7 +359,7 @@ class DBInstaller {
                                "step blob not null," .
                                "index step_recipe (recipeid)," .
                                "foreign key (recipeid) references recipes(id) on delete cascade," .
-                               "primary key(id))", null, __FILE__, __LINE__);
+                               "primary key(id))", 0, null, __FILE__, __LINE__);
   }
 
   function createIngredientsTable(&$db) {
@@ -349,7 +373,7 @@ class DBInstaller {
                                "unique(setid,orderid)," .
                                "index ingredient_set (setid)," .
                                "foreign key (setid) references ingredientsets(id) on delete cascade," .
-                               "primary key(id))", null, __FILE__, __LINE__);
+                               "primary key(id))", 0, null, __FILE__, __LINE__);
   }
 
   function createIngredientSetsTable(&$db) {
@@ -439,19 +463,19 @@ class DBInstaller {
                                "id mediumint unsigned not null," .
                                "email varchar(100) not null," .
                                "name varchar(100) not null," .
-							   "username varchar(50) not null," .
+				"username varchar(50) not null," .
                                "password char(33) not null," .
                                "auth char(32)," .
                                "disabled tinyint," .
                                "invited tinyint," .
-							   "favorite varchar(100)," .
-							   "website varchar(256)," .
+			   "favorite varchar(100)," .
+			   "website varchar(256)," .
                                "readonly smallint unsigned not null," .
                                "admin smallint unsigned not null," .
                                "modifieddate timestamp," .
                                "createdate timestamp not null," .
                                "unique (email)," .
-							   "unique (username)," .
+			   "unique (username)," .
                                "primary key(id))");
   }
 
@@ -478,7 +502,7 @@ class DBInstaller {
 
   function createStandardTable(&$db, $table, $sql) {
     $this->dropTable($db, $table);
-    $this->runQuery($db, $sql . " ENGINE = INNODB", null, __FILE__, __LINE__);
+    $this->runQuery($db, $sql . " ENGINE = INNODB", 0, null, __FILE__, __LINE__);
     $this->modifyId($db, $table);
     $this->createSequence($db, $table);
   }
