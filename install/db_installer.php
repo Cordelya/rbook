@@ -163,7 +163,7 @@ class DBInstaller {
 	  }
     return $con;
 	  }
-  }
+  
 
   
 function uninstall() { //TODO update query/PDO
@@ -171,7 +171,7 @@ function uninstall() { //TODO update query/PDO
     $res =& $db->query("drop database " . $this->databaseName);
 
     }
-  }
+  
 
   function install() {
 	  $this->errors = array();
@@ -231,9 +231,8 @@ function uninstall() { //TODO update query/PDO
 						getMessage('Cat07'), getMessage('Cat08'), getMessage('Cat09'), 
                         getMessage('Cat10'));
     for($i =0; $i < count($categories); $i++) {
-      $id = $db->nextId("categories");
-      $this->runQuery($db,"insert into `categories` (id, name) values (?, ?)",
-              array($id, $categories[$i]), __FILE__, __LINE__);
+      $this->runQuery($db,"insert into `categories` (name) values (:name)", 0,
+              array(":name" => $categories[$i]), __FILE__, __LINE__);
     }
   }
 
@@ -246,31 +245,36 @@ switch ($qtype) {
 	case 0: // No data is returned, only num rows
 	  	try {
 			if(isset($params)) {
-		  
+		  		echo "<p>Params received, data not requested</p>";
 				$query = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
 				$query->execute($params);
 				$res = $query->rowCount();
-				return $res
+				return $res;
 			} else {
+				echo "<p>Params not received, data not requested</p>";
 				$res = $db->exec($sql);
-				return $res
+				return $res;
 			}
 		} catch (Exception $e) {
-			error_log(("Caught Exception: ", $e->getMessage(), "\n")), 0);
+			error_log(("Caught Exception: " . $e->getMessage() . "\n"), 0);
 		}
+		break;
 	case 1: // data is returned
                 try {
-                       if(isset($params)) {
+			if(isset($params)) {
+				echo "<p>Params received, data requested</p>";
                                 $query = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
                                 $query->execute($params);
                                 $res = $query->fetchAll();
-                        } else {
+			} else {
+				echo "<p>No params received, data requested</p>";
                                 $query = $db->exec($sql);
                                 $res = $query->fetchAll();
                         }
                 } catch (Exception $e) {
-                        error_log(("Caught Exception: ", $e->getMessage(), "\n"), 0);
+                        error_log(("Caught Exception: " . $e->getMessage() . "\n"), 0);
 	}
+		break;
 }
 	//TODO update error handling
     //if(PEAR::isError($res)) {
@@ -286,10 +290,10 @@ switch ($qtype) {
 
 
   function createInitialUser(&$db) {
-
-	$params = array($this->initialEmail, 'root', md5('password'), $this->initialUser);
-    $res = $db->query("insert into `users` (email, username, password, name, readonly, admin) values (?, ?, ?, ?, ?, 0, 1)",
-	    $params);
+	$sql = "insert into `users` (email, username, password, name, readonly, admin) values (:email, :username, :password, :name, 0, 1)";
+	$params = array(":email" => $this->initialEmail, ":username" => 'root', ":password" => md5('password'), ":name" => $this->initialUser);
+	
+	$this->runQuery($db, $sql, 0, $params);
 
 //TODO update error handling
 //    if(PEAR::isError($res)) {
@@ -301,7 +305,7 @@ switch ($qtype) {
     $this->dropTable($db, "mine");
     $this->runQuery($db,
                     "create table if not exists `mine` (" .
-                    "userid mediumint unsigned not null," .
+                    "userid mediumint unsigned not null auto_increment," .
                     "recipeid mediumint unsigned not null," .
                     "createdate timestamp not null," .
                     "unique(userid, recipeid)," .
@@ -315,7 +319,7 @@ switch ($qtype) {
   function createInvitationTable(&$db) {
     $this->dropTable($db, "invitations");
     $this->runQuery($db, "create table if not exists `invitations` (" .
-                    "invitee mediumint unsigned not null," .
+                    "invitee mediumint unsigned not null auto_increment," .
                     "inviter mediumint unsigned not null," .
                     "code varchar(100) not null," .
                     "modifieddate timestamp not null," .
@@ -333,7 +337,7 @@ switch ($qtype) {
   function createImageTable(&$db) {
     $this->createStandardTable($db, "images",
                    "create table if not exists `images` (" .
-                   "id mediumint unsigned not null," .
+                   "id mediumint unsigned not null auto_increment," .
                    "uid CHAR(30) NOT NULL," .
                    "recipeid mediumint unsigned not null," .
                    "recipeuid char(30) not null," .
@@ -353,7 +357,7 @@ switch ($qtype) {
   function createStepsTable(&$db) {
     $this->createStandardTable($db, "steps", 
                                "create table if not exists `steps` (" .
-                               "id mediumint unsigned not null," .
+                               "id mediumint unsigned not null auto_increment," .
                                "recipeid mediumint unsigned not null," .
                                "orderid smallint unsigned not null," .
                                "step blob not null," .
@@ -365,7 +369,7 @@ switch ($qtype) {
   function createIngredientsTable(&$db) {
     $this->createStandardTable($db, "ingredients",
                                "create table if not exists `ingredients` (" .
-                               "id mediumint unsigned not null," .
+                               "id mediumint unsigned not null auto_increment," .
                                "setid mediumint unsigned not null," .
                                "amount char(" . INGREDIENT_AMOUNT_LENGTH . ") not null," .
                                "description varchar(" . INGREDIENT_DESCRIPTION_LENGTH . ") not null," .
@@ -379,7 +383,7 @@ switch ($qtype) {
   function createIngredientSetsTable(&$db) {
     $this->createStandardTable($db, "ingredientsets",
                                "create table if not exists `ingredientsets` (" .
-                               "id mediumint unsigned not null," .
+                               "id mediumint unsigned not null auto_increment," .
                                "recipeid mediumint unsigned not null," .
                                "orderid smallint unsigned not null," .
                                "name varchar(" . INGREDIENT_SET_NAME_LENGTH . ") not null," .
@@ -391,7 +395,7 @@ switch ($qtype) {
   function createRecipesTable(&$db) {
     $this->createStandardTable($db, "recipes",
                                "create table if not exists `recipes` (" .
-                               "id MEDIUMINT UNSIGNED NOT NULL," .
+                               "id MEDIUMINT UNSIGNED NOT NULL auto_increment," .
                                "name CHAR(" . RECIPE_NAME_FIELD_LENGTH . ") NOT NULL," .
                                "uniqueid CHAR(30) NOT NULL," .
                                "source char(" . RECIPE_SOURCE_FIELD_LENGTH . ")," .
@@ -416,7 +420,7 @@ switch ($qtype) {
   function createCategoriesTable(&$db) {
     $this->createStandardTable($db, "categories",
                                "create table if not exists `categories` (" .
-                               "id SMALLINT UNSIGNED NOT NULL," .
+                               "id SMALLINT UNSIGNED NOT NULL auto_increment," .
                                "name CHAR(" . CATEGORY_NAME_LENGTH . ") NOT NULL," .
                                "modifieddate timestamp," .
                                "createdate timestamp," .
@@ -427,7 +431,7 @@ switch ($qtype) {
   function createCommentTable(&$db) {
     $this->createStandardTable($db, "comments",
                                "create table if not exists `comments` (" .
-                               "id mediumint unsigned not null," .
+                               "id mediumint unsigned not null auto_increment," .
                                "comment blob,".
                                "recipeid mediumint unsigned not null,".
                                "userid mediumint unsigned not null," .
@@ -447,7 +451,7 @@ switch ($qtype) {
     $this->dropTable($db, "recipetocategory");
     $this->runQuery($db,
                     "create table if not exists `recipetocategory` (" .
-                    "recipeid mediumint unsigned not null," .
+                    "recipeid mediumint unsigned not null auto_increment," .
                     "categoryid smallint unsigned not null," .
                     "unique(recipeid, categoryid)," .
                     "index rc_recipes (recipeid)," .
@@ -460,7 +464,7 @@ switch ($qtype) {
   function createUsersTable(&$db) {
     $this->createStandardTable($db, "users",
                                "create table if not exists `users` (" .
-                               "id mediumint unsigned not null," .
+                               "id mediumint unsigned not null auto_increment," .
                                "email varchar(100) not null," .
                                "name varchar(100) not null," .
 				"username varchar(50) not null," .
@@ -482,7 +486,7 @@ switch ($qtype) {
   function createGroceryListTable(&$db) {
     $this->createStandardTable($db, "groceryitems",
                     "create table if not exists `groceryitems` (" .
-                    "id mediumint unsigned not null," .
+                    "id mediumint unsigned not null auto_increment," .
                     "userid mediumint unsigned not null, " .
                     "description varchar(100) not null, " .
                     "orderid mediumint not null," . 
@@ -493,7 +497,7 @@ switch ($qtype) {
     function createGuestbookTable(&$db) {
     $this->createStandardTable($db, "guestbook",
                     "create table if not exists `guestbook` (" .
-                    "id mediumint unsigned not null," .
+                    "id mediumint unsigned not null auto_increment," .
                     "name varchar(100) not null, " .
                     "comment blob not null, " .
                     "postdate datetime not null," .
@@ -504,19 +508,12 @@ switch ($qtype) {
     $this->dropTable($db, $table);
     $this->runQuery($db, $sql . " ENGINE = INNODB", 0, null, __FILE__, __LINE__);
     $this->modifyId($db, $table);
-    $this->createSequence($db, $table);
   }
 
   function modifyId(&$db, $table) {
   }
 
   function dropTable(&$db, $table) {
-  }
-
-  function createSequence(&$db, $table) {
-    $sequence = $db->getSequenceName($table);
-    $db->query("drop table if exists `$sequence`");
-    @$db->createSequence($table);
   }
 
   function logError($log, $file, $line) {
