@@ -150,11 +150,11 @@ class DBInstaller {
 
   function &getDb() {
 
-	  $dsn = "mysql:host=" . $this->databaseHost;
+	  $dsn = "mysql:host=" . $this->databaseHost . ";dbname=" . $this->databaseName;
 	  $options = [
 		PDO::ATTR_ERRMODE 		=> PDO::ERRMODE_EXCEPTION,
 		PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC,
-		PDO::ATTR_EMULATE_PREPARES	=> false,
+		PDO::ATTR_EMULATE_PREPARES	=> true,
 	  ];
 	  try {
 		  $con = new PDO($dsn, $this->adminUser, $this->password, $options);
@@ -186,9 +186,7 @@ class DBInstaller {
     }
 
     if($this->buildDatabase) {
-	    echo "<p>We need a new database. Please Wait...</p>";
 	    $this->createDatabase();
-	    echo "<p>All done!</p>";
     }
     $db = $this->getDb();
 	if(!isset($db)) {
@@ -220,8 +218,9 @@ class DBInstaller {
     if(empty($this->dbUserName)) {
       return;
     }
-    $q = "GRANT UPDATE, INSERT, DELETE, SELECT ON :dbname.* to :dbuser;";
-    $params = array(":dbname" => $this->databaseName, ":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost."'"));
+    //TODO need to create the user in one SQL query, then update privs in 2nd, then set password in 3rd
+    $q = "GRANT UPDATE, INSERT, DELETE, SELECT to :dbuser;";
+    $params = array(":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost."'"));
     $this->runQuery($db, $q, $params);
     $q = "SET password FOR :dbuser =PASSWORD(:password);";
     $params = array(":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost . "'"), ":password" => $this->password);
@@ -235,7 +234,7 @@ class DBInstaller {
                         getMessage('Cat10'));
     for($i =0; $i < count($categories); $i++) {
       $id = $db->nextId("categories");
-      $this->runQuery($db,"insert into categories (id, name) values (?, ?)",
+      $this->runQuery($db,"insert into `categories` (id, name) values (?, ?)",
               array($id, $categories[$i]), __FILE__, __LINE__);
     }
   }
@@ -243,9 +242,6 @@ class DBInstaller {
   function &runQuery(&$db, $sql, $params = null, $file = null, $line = null) {
 	  if(isset($params)) {
 		  $query = $db->prepare($sql, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
-		  echo "<p>";
-		  print_r($query);
-		  echo "</p>";
 		  $query->execute($params);
 			
 		$res = $query->fetchAll();
@@ -268,7 +264,7 @@ class DBInstaller {
   function createInitialUser(&$db) {
 
 	$params = array($this->initialEmail, 'root', md5('password'), $this->initialUser);
-    $res = $db->query("insert into users (email, username, password, name, readonly, admin) values (?, ?, ?, ?, ?, 0, 1)",
+    $res = $db->query("insert into `users` (email, username, password, name, readonly, admin) values (?, ?, ?, ?, ?, 0, 1)",
 	    $params);
 
 //TODO update error handling
@@ -280,7 +276,7 @@ class DBInstaller {
   function createMineTable(&$db) {
     $this->dropTable($db, "mine");
     $this->runQuery($db,
-                    "create table if not exists mine (" .
+                    "create table if not exists `mine` (" .
                     "userid mediumint unsigned not null," .
                     "recipeid mediumint unsigned not null," .
                     "createdate timestamp not null," .
@@ -294,7 +290,7 @@ class DBInstaller {
 
   function createInvitationTable(&$db) {
     $this->dropTable($db, "invitations");
-    $this->runQuery($db, "create table if not exists invitations (" .
+    $this->runQuery($db, "create table if not exists `invitations` (" .
                     "invitee mediumint unsigned not null," .
                     "inviter mediumint unsigned not null," .
                     "code varchar(100) not null," .
@@ -312,7 +308,7 @@ class DBInstaller {
 
   function createImageTable(&$db) {
     $this->createStandardTable($db, "images",
-                   "create table if not exists images (" .
+                   "create table if not exists `images` (" .
                    "id mediumint unsigned not null," .
                    "uid CHAR(30) NOT NULL," .
                    "recipeid mediumint unsigned not null," .
@@ -332,7 +328,7 @@ class DBInstaller {
 
   function createStepsTable(&$db) {
     $this->createStandardTable($db, "steps", 
-                               "create table if not exists steps (" .
+                               "create table if not exists `steps` (" .
                                "id mediumint unsigned not null," .
                                "recipeid mediumint unsigned not null," .
                                "orderid smallint unsigned not null," .
@@ -344,7 +340,7 @@ class DBInstaller {
 
   function createIngredientsTable(&$db) {
     $this->createStandardTable($db, "ingredients",
-                               "create table if not exists ingredients (" .
+                               "create table if not exists `ingredients` (" .
                                "id mediumint unsigned not null," .
                                "setid mediumint unsigned not null," .
                                "amount char(" . INGREDIENT_AMOUNT_LENGTH . ") not null," .
@@ -358,7 +354,7 @@ class DBInstaller {
 
   function createIngredientSetsTable(&$db) {
     $this->createStandardTable($db, "ingredientsets",
-                               "create table if not exists ingredientsets (" .
+                               "create table if not exists `ingredientsets` (" .
                                "id mediumint unsigned not null," .
                                "recipeid mediumint unsigned not null," .
                                "orderid smallint unsigned not null," .
@@ -370,7 +366,7 @@ class DBInstaller {
 
   function createRecipesTable(&$db) {
     $this->createStandardTable($db, "recipes",
-                               "create table if not exists recipes (" .
+                               "create table if not exists `recipes` (" .
                                "id MEDIUMINT UNSIGNED NOT NULL," .
                                "name CHAR(" . RECIPE_NAME_FIELD_LENGTH . ") NOT NULL," .
                                "uniqueid CHAR(30) NOT NULL," .
@@ -395,7 +391,7 @@ class DBInstaller {
 
   function createCategoriesTable(&$db) {
     $this->createStandardTable($db, "categories",
-                               "create table if not exists categories (" .
+                               "create table if not exists `categories` (" .
                                "id SMALLINT UNSIGNED NOT NULL," .
                                "name CHAR(" . CATEGORY_NAME_LENGTH . ") NOT NULL," .
                                "modifieddate timestamp," .
@@ -406,7 +402,7 @@ class DBInstaller {
 
   function createCommentTable(&$db) {
     $this->createStandardTable($db, "comments",
-                               "create table if not exists comments (" .
+                               "create table if not exists `comments` (" .
                                "id mediumint unsigned not null," .
                                "comment blob,".
                                "recipeid mediumint unsigned not null,".
@@ -426,7 +422,7 @@ class DBInstaller {
   function createRecipeToCategory(&$db) {
     $this->dropTable($db, "recipetocategory");
     $this->runQuery($db,
-                    "create table if not exists recipetocategory (" .
+                    "create table if not exists `recipetocategory` (" .
                     "recipeid mediumint unsigned not null," .
                     "categoryid smallint unsigned not null," .
                     "unique(recipeid, categoryid)," .
@@ -439,7 +435,7 @@ class DBInstaller {
 
   function createUsersTable(&$db) {
     $this->createStandardTable($db, "users",
-                               "create table if not exists users (" .
+                               "create table if not exists `users` (" .
                                "id mediumint unsigned not null," .
                                "email varchar(100) not null," .
                                "name varchar(100) not null," .
@@ -461,7 +457,7 @@ class DBInstaller {
 
   function createGroceryListTable(&$db) {
     $this->createStandardTable($db, "groceryitems",
-                    "create table if not exists groceryitems (" .
+                    "create table if not exists `groceryitems` (" .
                     "id mediumint unsigned not null," .
                     "userid mediumint unsigned not null, " .
                     "description varchar(100) not null, " .
@@ -472,7 +468,7 @@ class DBInstaller {
   
     function createGuestbookTable(&$db) {
     $this->createStandardTable($db, "guestbook",
-                    "create table if not exists guestbook (" .
+                    "create table if not exists `guestbook` (" .
                     "id mediumint unsigned not null," .
                     "name varchar(100) not null, " .
                     "comment blob not null, " .
@@ -495,7 +491,7 @@ class DBInstaller {
 
   function createSequence(&$db, $table) {
     $sequence = $db->getSequenceName($table);
-    $db->query("drop table if exists $sequence");
+    $db->query("drop table if exists `$sequence`");
     @$db->createSequence($table);
   }
 

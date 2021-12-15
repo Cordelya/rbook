@@ -28,7 +28,7 @@
 
 class MysqlDBInstaller extends DBInstaller {
   
-  function MysqlDBInstaller() {
+  function MysqlDBInstaller_f() {
     $this->DBInstaller();
   }
   
@@ -47,22 +47,25 @@ class MysqlDBInstaller extends DBInstaller {
     //$con = @mysqli_connect($dsn, $this->adminUser, $this->password, $options);
 	  
       if(!$con) {
-      	$this->errors[$e] = $e;
+      	$this->errors[] = $e;
       	return;
     }
     
     $this->exists = true;
     if($this->action == "fresh") {
 	    //drop any existing db
-	    $q = "DROP DATABASE IF EXISTS :db";
-	    $params = array(":db" => $this->databaseName);
-	    $sth = $con->prepare($q, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+	    $q = "DROP DATABASE IF EXISTS `:db`";
+	    $db = $this->databaseName;
+	    $params = array(":db" => $db);
+	    $sth = $con->prepare($q);
 	    $sth->execute($params);
+
+
+
 	    $q_result = $sth->fetchAll();
 	    //create new database
-	    $q = "CREATE DATABASE :db";
-	    $params = array(":db" => $this-databaseName);
-	    $sth = $con->prepare($q, array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY));
+	    $q = "CREATE DATABASE `:db`";
+	    $sth = $con->prepare($q);
 	    $q_result = $sth->fetchAll();
 	    if ($q_result) {
 		    return $q_result;
