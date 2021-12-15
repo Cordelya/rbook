@@ -33,7 +33,7 @@ class IngredientSet extends BaseRecord {
     var $rows;
     var $id;
 
-    function IngredientSet() {
+    function __construct() {
         $this->BaseRecord();
         $this->name = "Ingredients";
         $this->rows = array();
@@ -82,7 +82,9 @@ class IngredientSet extends BaseRecord {
     }
 
     function delete() {
-        BaseRecord::deleteMultipleOfClass(array('id' => $this->id), "ingredientset");
+	    $is_id = array('id' => $this->id);
+	    $table = 'ingredientset';
+        BaseRecord::deleteMultipleOfClass($is_id, $table);
     }
 
     function to_s() {

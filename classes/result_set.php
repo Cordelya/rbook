@@ -46,7 +46,7 @@ class ResultSet {
    * results - the search results, which is an array of objects
    */
 
-  function ResultSet($resultsPerPage, $results) {
+  function __construct($resultsPerPage, $results) {
     $this->resultsPerPage = $resultsPerPage;
     $this->results = $results;
     $this->page = 1;

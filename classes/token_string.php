@@ -21,7 +21,7 @@
 
 class TokenString extends Token {
   var $value;
-  function TokenString($value) {
+  function __construct($value) {
     $this->value = $value;
   }
 

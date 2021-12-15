@@ -75,37 +75,29 @@ class BaseRecord {
    * @param tableName the table name associated with this record.
    */
   
-  function BaseRecord($tableName = null) {
+  function __construct($tableName = null) {
     $this->id = -1;
     $this->tableName = $tableName;
   }
 
   /**
-   * Returns the URL to the database.
+   * Returns the db connection
    */
-
-  function getDbUrl() {
-    return "mysql://" . DBUSER . ":" . DBPASSWORD . "@" . DBHOST . "/" . DBNAME;
-  }
-
-  /**
-   * Returns a database connection.
-   * @access protected
-   * @return object a DB connection object
-   */
-
-  function &getDb() {
-    $con =& DB::connect(BaseRecord::getDbUrl());
-    if(PEAR::isError($con) || !isset($con)) {
-      rb_log(__FILE__ . "," . __LINE__ . "," . $con->getMessage());
-      trigger_error("Unable to connect to the database. The connection settings " .
-          "to the database are probably improperly set up or the " . 
-          "database is down.", E_USER_ERROR);
-    }
-
-    $con->autoCommit(false);
-    return $con;
-  }
+   function &getDb() {
+   	$dsn = "mysql:host=" . DBHOST . ";dbname=" . DBNAME;
+  	$options = [
+  		PDO::ATTR_ERRMODE 		=> PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_DEFAULT_FETCH_MODE	=> PDO::FETCH_ASSOC,
+		PDO::ATTR_EMULATE_PREPARES	=> true,
+	];
+  	try {
+		$con = new PDO($dsn, DBUSER, DBPASSWORD, $options);
+  	} catch (\PDOException $e) {
+  		throw new \PDOException($e->getMessage(), (int)$e->getCode());
+	}
+	return $con;
+		  	  }
+	
 
   /**
    * Runs the query and returns the results.
@@ -113,28 +105,39 @@ class BaseRecord {
    * @static
    */
 
-  function &runQuery(&$db, $query, $params = null, $file = null, $line = null) {
-    if(isset($params)) {
-      if(is_array($params)) {
-        rb_log("Running query: " . $query . ", params: " . implode(",", $params));
-      } else {
-        rb_log("Running query: " . $query . ", params: " . $params);
-      }
-      $res =& $db->query($query, $params);
-    } else {
-      rb_log("Running query: " . $query );
-      $res =& $db->query($query);
-    }
-    if(PEAR::isError($res)) {
-      $file = empty($file) ? "" : $file;
-      $line = empty($line) ? "" : $line;
-      rb_log("Error running query: " . $file . ", " . $line . ", " . $query . ", " . $res->getMessage());
-	  rb_log("Error details: " . $res->getDebugInfo());
-      return null;
-    }
-    return $res;
+  function &runQuery(&$db, $sql, $qtype = 0, $params = null, $file = null, $line = null) {
+	  try {
+		  $opts = array(PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY);
+	if(isset($params)) {
+		if(is_array($params)) {
+		rb_log("Running query: " . $query . ", params: " . implode(",", $params));
+	} else {
+		rb_log("Running query: " . $query . ", params: " . $params);
+	}	
+			if($qtype == 0) {
+				$query = $db->prepare($sql, $opts);
+				$query->execute($params);
+				$res = $query->rowCount();
+			} else if ($qtype == 1) {
+				$query = $db->prepare($sql, $opts);
+				$query->execute($params);
+				$res = $query->fetchAll();
+			}
+	} else {
+		rb_log("Running query: " . $query );
+		if($qtype == 0) {
+			$res = $db->exec($sql);
+		} else if ($qtype == 1) {
+			$query = $db->exec($sql);
+			$res = $query->fetchAll();
+		}
+	}
+    
+	return $res;
+	} catch (Exception $e) {
+		rb_log("Error details: " . $e->getMessage() . "\n");
   }
-  
+  }  
   /**
    * Returns true if this object has never been persisted to the
    * database.
@@ -183,16 +186,13 @@ class BaseRecord {
 
   function deleteMultipleOfClass(&$qualifiers, $tableName) {
     $db =& BaseRecord::getDb();
-    $res =& BaseRecord::runQuery($db, "delete from $tableName " .
-                                 BaseRecord::buildWhereClauseDb($qualifiers),
-                                 BaseRecord::prepareQualifiers($qualifiers),
+    $sql = "delete from :tablename " . BaseRecord::buildWhereClauseDb($qualifiers);
+    $params = BaseRecord::prepareQualifiers($qualifiers);
+    $res =& BaseRecord::runQuery($db, $sql, 0, $params,
                                  __FILE__, __LINE__);
-    $numRows = $db->affectedRows();
-    if($res != null) {
-      $db->commit();
-    } 
-    $db->disconnect();
-    return $numRows;
+    
+    $db = null;
+    return $res;
   }
 
 

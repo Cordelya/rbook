@@ -215,14 +215,12 @@ function uninstall() { //TODO update query/PDO
       return;
     }
     // create DB user & grant perms
-    $q_create = "CREATE USER IF NOT EXISTS :dbuser;";
-    $q_grant = "GRANT UPDATE, INSERT, DELETE, SELECT to :dbuser;";
-    $params = array(":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost."'"));
-    $this->runQuery($db, $q_create, 0, $params);
-    $this->runQuery($db, $q_grant, 0, $params);
-    $q_set = "SET password FOR :dbuser =PASSWORD(:password);";
-    $params = array(":dbuser" => ("'" . $this->dbUserName . "'@'" . $this->databaseHost . "'"), ":password" => $this->password);
-    $this->runQuery($db, $q_set, 0, $params);
+    $q_create = "CREATE USER IF NOT EXISTS :dbusername@:dbhost IDENTIFIED BY :password;";
+    $q_grant = "GRANT UPDATE, INSERT, DELETE, SELECT ON " . $this->databaseName . ".* to :dbusername@:dbhost";
+    $create_params = array(":dbusername" => $this->dbUserName, ":dbhost" => $this->databaseHost, ":password" => $this->password);
+    $grant_params = array(":dbusername" => $this->dbUserName, ":dbhost" => $this->databaseHost);
+    $this->runQuery($db, $q_create, 0, $create_params);
+    $this->runQuery($db, $q_grant, 0, $grant_params);
   }
 
   function populateCategories(&$db) {

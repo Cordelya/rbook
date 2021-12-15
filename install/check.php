@@ -94,15 +94,6 @@ if(!class_exists("PDO")) {
 }
 
 
-# TODO check whether this is needed since we're using PDO which is core
-/******************************************************************************
- * Check that mysqli extension is installed
- *****************************************************************************/
-
-if(!class_exists('PDO_mysql')) {
-  $errors[] = "E|".getMessage('mysqlNotFound')."|".getMessage("mysqlNotFound").$f;
-}
-
 /******************************************************************************
  * Check that gd extension is installed
  *****************************************************************************/

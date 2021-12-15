@@ -75,7 +75,7 @@ class BaseController {
   var $requiresSession;
 
 
-  function BaseController($name = null, $requires_session = true) {
+  function __construct($name = null, $requires_session = true) {
     $this->name = $name;
     $this->defaultAction = "index";
 	$this->requiresSession = $requires_session;

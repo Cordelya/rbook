@@ -50,7 +50,7 @@ class Comment extends BaseRecord {
   var $rating;
   var $postDate;
 
-  function Comment() {
+  function __construct() {
     $this->BaseRecord("comments");
     $this->postDate = date("y-m-d H:i:s");
   }

@@ -22,8 +22,7 @@
 define("RBOOK_VERSION", "2.4");
 require_once('DB.php');
 require_once(dirname(__FILE__) . '/helpers/resources.php');
-require_once(dirname(__FILE__) . '/extlib/Smarty/Smarty.class.php');
-require_once(dirname(__FILE__) . '/extlib/Smarty/internals/core.write_file.php');
+require_once(dirname(__FILE__) . '/extlib/Smarty/libs/Smarty.class.php');
 require_once(dirname(__FILE__) . '/config.php');
 define("ROOT_DIRECTORY", dirname(__FILE__));
 $version_breakdown = explode(".", phpversion());

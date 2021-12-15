@@ -43,7 +43,7 @@ class SearchResult {
   var $cachedRatingHits;
   var $username;
 
-  function SearchResult($title, $url, $recipeId, $submittedBy, $username, $submittedWhen, 
+  function __construct($title, $url, $recipeId, $submittedBy, $username, $submittedWhen, 
 						$category, $userId, $description, $cachedRating, $cachedRatingHits) {
     $this->title = $title;
     $this->url = $url;
