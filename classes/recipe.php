@@ -58,7 +58,7 @@ class Recipe extends BaseRecord {
   var $lastViewed;
   var $viewCount;
 
-  function Recipe() {
+  function __construct() {
     $this->BaseRecord();
     $this->title = getMessage("NewTitle");
     $this->ingredients = array();

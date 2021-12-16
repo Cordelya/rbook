@@ -43,7 +43,7 @@ class User extends BaseRecord {
   var $favorite;
   var $website;
 
-  function User() {
+  function __construct() {
     $this->BaseRecord();
     $this->password = md5('password');
     $this->disabled = 0;

@@ -47,7 +47,7 @@ class Guestbook extends BaseRecord {
   var $comment;
   var $postdate;
 
-  function Guestbook() {
+  function _construct() {
     $this->BaseRecord("guestbook");
   }
         

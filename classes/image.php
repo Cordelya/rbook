@@ -53,7 +53,7 @@ class Image extends BaseRecord {
   var $uid;
   var $id;
 
-  function Image() {
+  function __construct() {
     $this->BaseRecord("images");
     $this->uid = $this->createUid();
   }

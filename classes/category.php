@@ -53,7 +53,7 @@ class Category extends BaseRecord {
   var $name;
   var $recipeCount;
 
-  function Category() {
+  function __construct() {
     $this->BaseRecord();
   }
 

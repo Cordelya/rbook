@@ -35,7 +35,7 @@ class GroceryList extends BaseRecord {
   var $orderid;
   var $userid;
 
-  function GroceryList() {
+  function __construct() {
     $this->BaseRecord();
     $this->orderid = 0;
   }
